@@ -7,14 +7,32 @@ Multi-node setups are crucial for manufacturing scenarios as addressed in the sd
 ## Introduction
 
 The [CloudPlug Edge](https://www.sotec.eu/loesungen/cloudplug-edge/) manufactured by [Sotec](https://sotec.eu) is a device enabling cloud connectivity for industrial machines.
-As of now, software services for the CloudPlug are deployed as Docker containers. In particular, multiple services running on the device, are orchestrated via `docker compose` enabling a dedicated runtime enviroment for each service. Thus, the software stack on the device is easily extensible and modular. Moreover, the declarative deployment with `docker compose` ensures the services to be restarted in case of a failure. This leads to a very stable operation of the CloudPlug Edge in production scenarios.
-However, the deployment strategy using `docker compose` limits the deployment to a single device. Further, there is not unique management plane for all devices in a multi-device setup. Consequently, the operation of multiple CloudPlugs can be cumbersome, as every single device needs to be accessed independently for maintenance purposes or troubleshooting. Obviously, these kind of operations contradict the general goal of the sdm4fzi project.
+As of now, software services for the CloudPlug Edge are deployed as Docker containers. In particular, multiple services running on the device, are orchestrated via `docker compose` enabling a dedicated runtime enviroment for each service. Thus, the software stack on the device is easily extensible and modular. Moreover, the declarative deployment with `docker compose` ensures the services to be restarted in case of a failure. This leads to a very stable operation of the CloudPlug Edge in production scenarios.
+However, the deployment strategy using `docker compose` limits the deployment to a single device. Further, there is not unique management plane for all devices in a multi-device setup. Consequently, the operation of multiple CloudPlugs Edge can be cumbersome, as every single device needs to be accessed independently for maintenance purposes or troubleshooting. Obviously, these kind of operations contradict the general goal of the sdm4fzi project.
 This paper introduces a multi-node deployment strategy based on Kubernetes enabling to manage multiple devices through a single entry point, i.e. the Kubernetes control-plane.
-The rest of this article is structured as follows. Section
+The rest of this article is structured as follows.
 
-## Setup Overview
+---
+## System Overview
 
-Fig. \ref{todo} shows a state-of-the-art single node application scenario for the Cloudplug. Opposed to the single-node setup, Fig. \ref{todo} illustrates the SDM4FZI use case including multiple CloudPlugs and a Raspberry Pi 4 Model B hosting the Kubernetes control-plane. Conceptually, this mulit-node setup can be extended by futher CloudPlug devices or even other devices can be joined to this "compute cluster" \footnote{Note that this appraoch is similar to the sdm4fzi/hello-world setup \ref{todo}}. Once registered as worker `nodes` in the Kubernetes control-plane, workload can be deployed to a variety of devices on a shopfloor. Consequently, multiple suppliers could attach, e.g. their control nodes for robots or conveyer belts to the cluster and perform software deployments and updates through the Kuberentes API.
+![systemoverview](./images/system_overview2.svg#center)
+
+The illustrated system architecture shows an abstract overview of a planned demonstrator for the [SDM4FZI](https://www.sdm4fzi.de/). Different edge devices are used to ensure a wide range of variants. These are described in more detail below.
+
+**Monitoring level device**: This device is responsible for display information from various sources. The necessary information is provided by the control level device.
+
+**Control level device**: This device receives data from the other edge devices and processes it to make informed decisions. It acts as a central hub coordinating the actions of other devices and controlling the overall system.
+
+**Application level device**: These devices are supposed to "reflect" the general edge devices - they are supposed to work with applications that you get via the control level device. They are responsible for performing physical actions. And may control a robotic arm or other types of equipment.
+
+All the above devices are connected through a local network and communicate with each other to perform the overall system's tasks. The system is designed to be modular and scalable, allowing for the integration of additional devices as needed.
+
+---
+## Defined Overview
+
+![definedoverview](./images/defined_overview.svg#center)
+
+Fig: \ref{systemoverview} system overview shows a state-of-the-art single node application scenario for the Cloudplug. Opposed to the single-node setup, Fig. \ref{todo} illustrates the SDM4FZI use case including multiple CloudPlugs and a Raspberry Pi 4 Model B hosting the Kubernetes control-plane. Conceptually, this mulit-node setup can be extended by futher CloudPlug devices or even other devices can be joined to this "compute cluster" \footnote{Note that this appraoch is similar to the sdm4fzi/hello-world setup \ref{todo}}. Once registered as worker `nodes` in the Kubernetes control-plane, workload can be deployed to a variety of devices on a shopfloor. Consequently, multiple suppliers could attach, e.g. their control nodes for robots or conveyer belts to the cluster and perform software deployments and updates through the Kuberentes API.
 
 For the sake of comprehensiveness, the setup process of the Kubernetes cluster is outlined in the following. We chose to use k3s \ref{todo} as a lightweight Kubernetes distribution for an easy bootstrap of the cluster. A major advantage of using k3s lies in the fact that it is deployed as a single binary, which can be run in `server`-mode for the control-plane components and `agent`-mode for the worker `nodes` \ref{todo}. The k3s binary was installed via the official installation script \ref{todo: https://get.k3s.io/}, and the cluster was instaciated by running:
 
